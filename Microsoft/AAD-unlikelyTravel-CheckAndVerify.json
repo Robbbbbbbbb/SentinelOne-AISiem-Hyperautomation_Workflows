@@ -1,0 +1,425 @@
+{
+  "actions": [
+    {
+      "action": {
+        "client_data": {
+          "collapsed": false,
+          "dimensions": {
+            "height": 76,
+            "width": 256
+          },
+          "position": {
+            "x": 1.1486983549970375,
+            "y": -126.35681904967385
+          }
+        },
+        "connection_id": null,
+        "connection_name": null,
+        "data": {
+          "action_type": "singularity_response_trigger",
+          "filter_groups": [
+            {
+              "condition": {
+                "conditions": [
+                  {
+                    "compared_value": "Microsoft Identity Protection",
+                    "comparison_operator": "equals",
+                    "input_value": "detectionSource.product"
+                  },
+                  {
+                    "compared_value": "Unknown Device",
+                    "comparison_operator": "equals",
+                    "input_value": "asset.assetTypeClassifier"
+                  }
+                ],
+                "operator": "and"
+              },
+              "event_subtypes": [
+                "CREATE"
+              ],
+              "event_type": "alert",
+              "is_disabled": false,
+              "run_automatically": false
+            }
+          ],
+          "name": "Unlikely Travel Detected"
+        },
+        "description": "",
+        "integration_id": null,
+        "snippet_version_id": null,
+        "snippet_workflow_id": null,
+        "tag": "core_action",
+        "type": "singularity_response_trigger",
+        "use_connection_name": false
+      },
+      "connected_to": [
+        {
+          "custom_handle": null,
+          "target": 0
+        }
+      ],
+      "export_id": 6,
+      "parent_action": null
+    },
+    {
+      "action": {
+        "client_data": {
+          "collapsed": false,
+          "dimensions": {
+            "height": 76,
+            "width": 256
+          },
+          "position": {
+            "x": 1.1486983549970375,
+            "y": 50.320380950326154
+          }
+        },
+        "connection_id": null,
+        "connection_name": null,
+        "data": {
+          "action_type": "condition",
+          "condition": {
+            "conditions": [
+              {
+                "conditions": [
+                  {
+                    "compared_value": "unlikelyTravel",
+                    "comparison_operator": "equals",
+                    "input_value": "{{Function.REGEX_REPLACE(Function.REGEX_REPLACE(unlikely-travel-detected.data, \"^(?s).*?\\\"message\\\"\\\\s*:\\\\s*\\\"[^\\\"]+\\\".*?\\\"message\\\"\\\\s*:\\\\s*\\\"\", \"\"), \"\\\".*$\", \"\")}}"
+                  }
+                ],
+                "operator": "and"
+              }
+            ],
+            "operator": "and"
+          },
+          "condition_type": "simple",
+          "conditions": null,
+          "conditions_relationship": "and",
+          "name": "Alert is For Unlikely Travel"
+        },
+        "description": "",
+        "integration_id": null,
+        "snippet_version_id": null,
+        "snippet_workflow_id": null,
+        "tag": "core_action",
+        "type": "condition",
+        "use_connection_name": false
+      },
+      "connected_to": [
+        {
+          "custom_handle": "true",
+          "target": 5
+        }
+      ],
+      "export_id": 0,
+      "parent_action": null
+    },
+    {
+      "action": {
+        "client_data": {
+          "collapsed": false,
+          "dimensions": {
+            "height": 76,
+            "width": 256
+          },
+          "position": {
+            "x": 79.89869835499704,
+            "y": 226.99758095032615
+          }
+        },
+        "connection_id": null,
+        "connection_name": null,
+        "data": {
+          "action_type": "variable",
+          "name": "Set First Variables",
+          "variables": [
+            {
+              "is_secret": false,
+              "name": "username",
+              "value": "{{unlikely-travel-detected.data.process.username}}"
+            },
+            {
+              "is_secret": false,
+              "name": "domain",
+              "value": "\"@domain.lcl\""
+            },
+            {
+              "is_secret": false,
+              "name": "msAlertUser",
+              "value": "loggedInUser@domain.lcl"
+            },
+            {
+              "is_secret": false,
+              "name": "detectTimestamp",
+              "value": "{{unlikely-travel-detected.data.detectedAt}}"
+            },
+            {
+              "is_secret": false,
+              "name": "ipAddr",
+              "value": "{{unlikely-travel-detected.data.asset.name}}"
+            },
+            {
+              "is_secret": false,
+              "name": "ip2Addr",
+              "value": "{{Function.REGEX_REPLACE(Function.REGEX_REPLACE(Function.REGEX_REPLACE(unlikely-travel-detected.data, \"^(?s).*?\\\"message\\\"\\\\s*:\\\\s*\\\"\", \"\"), \"\\\".*\", \"\"), \"unlikelyTravel\", \"\")}}"
+            }
+          ],
+          "variables_scope": "local"
+        },
+        "description": "",
+        "integration_id": null,
+        "snippet_version_id": null,
+        "snippet_workflow_id": null,
+        "tag": "core_action",
+        "type": "variable",
+        "use_connection_name": false
+      },
+      "connected_to": [
+        {
+          "custom_handle": null,
+          "target": 3
+        }
+      ],
+      "export_id": 5,
+      "parent_action": null
+    },
+    {
+      "action": {
+        "client_data": {
+          "collapsed": false,
+          "dimensions": {
+            "height": 76,
+            "width": 256
+          },
+          "position": {
+            "x": 79.89869835499704,
+            "y": 374.64560691332247
+          }
+        },
+        "connection_id": "[sanitized]",
+        "connection_name": "",
+        "data": {
+          "action_type": "http_request",
+          "continue_on_fail": false,
+          "headers": {
+            "Content-Type": "application/json",
+            "accept": "application/json"
+          },
+          "method": "get",
+          "name": "Get Affected User Workstation Details",
+          "parameters": [
+            {
+              "parameter_name": "lastLoggedInUserName__contains",
+              "parameter_value": "{{Function.REPLACE(local_var.username, local_var.domain, \"\")}}"
+            }
+          ],
+          "payload": null,
+          "proxy_host": null,
+          "proxy_password": null,
+          "proxy_port": null,
+          "proxy_user": null,
+          "public_action_id": "[sanitized]",
+          "redirect_follow": true,
+          "retry_on_status_code": null,
+          "retry_on_status_codes": [
+            500
+          ],
+          "ssl_verification": true,
+          "timeout": 30,
+          "url": "{{Connection.protocol}}{{Connection.url}}<@/web/api/v2.1/agents@>",
+          "url_path": "/web/api/v2.1/agents",
+          "url_prefix": null,
+          "use_authentication_data": true,
+          "use_proxy": false
+        },
+        "description": "Get the Agents, and their data, that match the filter. This command gives the Agent ID, which you can use in other commands.\nTo save the list and data to a CSV file, use \"export/agents\".",
+        "integration_id": "[sanitized]",
+        "snippet_version_id": null,
+        "snippet_workflow_id": null,
+        "tag": "integration",
+        "type": "http_request",
+        "use_connection_name": false
+      },
+      "connected_to": [
+        {
+          "custom_handle": null,
+          "target": 2
+        }
+      ],
+      "export_id": 3,
+      "parent_action": null
+    },
+    {
+      "action": {
+        "client_data": {
+          "collapsed": false,
+          "dimensions": {
+            "height": 76,
+            "width": 256
+          },
+          "position": {
+            "x": 79.89869835499704,
+            "y": 556.4639785128462
+          }
+        },
+        "connection_id": null,
+        "connection_name": null,
+        "data": {
+          "action_type": "condition",
+          "condition": {
+            "conditions": [
+              {
+                "conditions": [
+                  {
+                    "compared_value": "{{Function.REGEX_EXTRACT(get-affected-user-workstation-details.body.data, \"\\\"externalIp\\\"\\\\s*:\\\\s*\\\"([^\\\"]+)\\\"\")}}",
+                    "comparison_operator": "equals",
+                    "input_value": "{{set-first-variables.ipAddr}}"
+                  }
+                ],
+                "operator": "and"
+              }
+            ],
+            "operator": "and"
+          },
+          "condition_type": "simple",
+          "conditions": null,
+          "conditions_relationship": "and",
+          "name": "Detected IP the same as Agent IP"
+        },
+        "description": "",
+        "integration_id": null,
+        "snippet_version_id": null,
+        "snippet_workflow_id": null,
+        "tag": "core_action",
+        "type": "condition",
+        "use_connection_name": false
+      },
+      "connected_to": [
+        {
+          "custom_handle": "false",
+          "target": 1
+        }
+      ],
+      "export_id": 2,
+      "parent_action": null
+    },
+    {
+      "action": {
+        "client_data": {
+          "collapsed": false,
+          "dimensions": {
+            "height": 76,
+            "width": 256
+          },
+          "position": {
+            "x": 2.468206265769922,
+            "y": 715.9875756727987
+          }
+        },
+        "connection_id": "[sanitized]",
+        "connection_name": "",
+        "data": {
+          "action_type": "http_request",
+          "continue_on_fail": false,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "method": "post",
+          "name": "Create Chat With Affected User",
+          "parameters": [],
+          "payload": "{\n  \"chatType\": \"oneOnOne\",\n  \"members\": [\n    {\n      \"@odata.type\": \"#microsoft.graph.aadUserConversationMember\",\n      \"roles\": [\n        \"owner\"\n      ],\n      \"user@odata.bind\": \"https://graph.microsoft.com/v1.0/users('{{local_var.username}}')\"\n    },\n    {\n      \"@odata.type\": \"#microsoft.graph.aadUserConversationMember\",\n      \"roles\": [\n        \"owner\"\n      ],\n      \"user@odata.bind\": \"https://graph.microsoft.com/v1.0/users('{{local_var.msAlertUser}}')\"\n    }\n  ]\n}",
+          "proxy_host": null,
+          "proxy_password": null,
+          "proxy_port": null,
+          "proxy_user": null,
+          "public_action_id": "[sanitized]",
+          "redirect_follow": true,
+          "retry_on_status_code": null,
+          "retry_on_status_codes": [
+            500
+          ],
+          "ssl_verification": true,
+          "timeout": 30,
+          "url": "{{Connection.protocol}}graph.microsoft.com<@/v1.0/chats@>",
+          "url_path": null,
+          "url_prefix": null,
+          "use_authentication_data": true,
+          "use_proxy": false
+        },
+        "description": "Create new one on one chat",
+        "integration_id": "[sanitized]",
+        "snippet_version_id": null,
+        "snippet_workflow_id": null,
+        "tag": "integration",
+        "type": "http_request",
+        "use_connection_name": false
+      },
+      "connected_to": [
+        {
+          "custom_handle": null,
+          "target": 4
+        }
+      ],
+      "export_id": 1,
+      "parent_action": null
+    },
+    {
+      "action": {
+        "client_data": {
+          "collapsed": false,
+          "dimensions": {
+            "height": 76,
+            "width": 256
+          },
+          "position": {
+            "x": 2.468206265769922,
+            "y": 831.9674117772454
+          }
+        },
+        "connection_id": "[sanitized]",
+        "connection_name": "",
+        "data": {
+          "action_type": "http_request",
+          "continue_on_fail": false,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "method": "post",
+          "name": "Message User To Confirm",
+          "parameters": [],
+          "payload": "{\n  \"body\": {\n    \"contentType\": \"html\",\n    \"content\": \"<attachment id=\\\"1\\\"></attachment>\"\n  },\n  \"attachments\": [\n    {\n      \"id\": \"1\",\n      \"contentType\": \"application/vnd.microsoft.card.adaptive\",\n      \"contentUrl\": null,\n      \"content\": \"{\\n  \\\"$schema\\\": \\\"https://adaptivecards.io/schemas/adaptive-card.json\\\",\\n  \\\"type\\\": \\\"AdaptiveCard\\\",\\n  \\\"version\\\": \\\"1.4\\\",\\n  \\\"body\\\": [\\n    {\\n      \\\"type\\\": \\\"Container\\\",\\n      \\\"style\\\": \\\"attention\\\",\\n      \\\"bleed\\\": true,\\n      \\\"items\\\": [\\n        {\\n          \\\"type\\\": \\\"TextBlock\\\",\\n          \\\"text\\\": \\\"⚠️ Security Alert\\\",\\n          \\\"wrap\\\": true,\\n          \\\"size\\\": \\\"Large\\\",\\n          \\\"weight\\\": \\\"Bolder\\\",\\n          \\\"color\\\": \\\"Dark\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"TextBlock\\\",\\n          \\\"text\\\": \\\"Immediate action required - account at risk.\\\",\\n          \\\"wrap\\\": true,\\n          \\\"spacing\\\": \\\"Small\\\",\\n          \\\"color\\\": \\\"Dark\\\",\\n          \\\"size\\\": \\\"Medium\\\"\\n        }\\n      ]\\n    },\\n    {\\n      \\\"type\\\": \\\"ColumnSet\\\",\\n      \\\"spacing\\\": \\\"Medium\\\",\\n      \\\"columns\\\": [\\n        {\\n          \\\"type\\\": \\\"Column\\\",\\n          \\\"width\\\": \\\"stretch\\\",\\n          \\\"items\\\": [\\n            {\\n              \\\"type\\\": \\\"TextBlock\\\",\\n              \\\"text\\\": \\\"From: {{local_var.msAlertUser}}\\\",\\n              \\\"size\\\": \\\"Small\\\",\\n              \\\"wrap\\\": true\\n            }\\n          ]\\n        },\\n        {\\n          \\\"type\\\": \\\"Column\\\",\\n          \\\"width\\\": \\\"auto\\\",\\n          \\\"items\\\": [\\n            {\\n              \\\"type\\\": \\\"ColumnSet\\\",\\n              \\\"columns\\\": [\\n                {\\n                  \\\"type\\\": \\\"Column\\\",\\n                  \\\"width\\\": \\\"auto\\\",\\n                  \\\"items\\\": [\\n                    {\\n                      \\\"type\\\": \\\"TextBlock\\\",\\n                      \\\"text\\\": \\\"Status:\\\",\\n                      \\\"size\\\": \\\"Small\\\",\\n                      \\\"wrap\\\": true\\n                    }\\n                  ]\\n                },\\n                {\\n                  \\\"type\\\": \\\"Column\\\",\\n                  \\\"width\\\": \\\"auto\\\",\\n                  \\\"items\\\": [\\n                    {\\n                      \\\"type\\\": \\\"TextBlock\\\",\\n                      \\\"text\\\": \\\"Investigating\\\",\\n                      \\\"weight\\\": \\\"Bolder\\\",\\n                      \\\"color\\\": \\\"Warning\\\",\\n                      \\\"size\\\": \\\"Small\\\",\\n                      \\\"wrap\\\": true\\n                    }\\n                  ]\\n                }\\n              ]\\n            }\\n          ]\\n        }\\n      ]\\n    },\\n    {\\n      \\\"type\\\": \\\"TextBlock\\\",\\n      \\\"text\\\": \\\"An unusual login for your account was detected and requires immediate review.\\\",\\n      \\\"wrap\\\": true,\\n      \\\"spacing\\\": \\\"Medium\\\"\\n    },\\n    {\\n      \\\"type\\\": \\\"Container\\\",\\n      \\\"style\\\": \\\"emphasis\\\",\\n      \\\"spacing\\\": \\\"Small\\\",\\n      \\\"items\\\": [\\n        {\\n          \\\"type\\\": \\\"FactSet\\\",\\n          \\\"facts\\\": [\\n            { \\\"title\\\": \\\"Username:\\\", \\\"value\\\": \\\"{{set-first-variables.username}}\\\" },\\n            { \\\"title\\\": \\\"Date/Time:\\\", \\\"value\\\": \\\"{{set-first-variables.detectTimestamp}}\\\" },\\n            { \\\"title\\\": \\\"Location:\\\", \\\"value\\\": \\\"{{set-first-variables.ip2Addr}}\\\" },\\n            { \\\"title\\\": \\\"IP Address:\\\", \\\"value\\\": \\\"{{unlikely-travel-detected.data.asset.name}}\\\" }\\n          ]\\n        }\\n      ]\\n    },\\n    {\\n      \\\"type\\\": \\\"TextBlock\\\",\\n      \\\"text\\\": \\\"Please verify this activity by selecting an option below.\\\",\\n      \\\"wrap\\\": true,\\n      \\\"spacing\\\": \\\"Medium\\\"\\n    },\\n    {\\n      \\\"type\\\": \\\"TextBlock\\\",\\n      \\\"text\\\": \\\"For immediate assistance, please contact the Help Desk at (###) ###-####.\\\",\\n      \\\"wrap\\\": true,\\n      \\\"spacing\\\": \\\"Medium\\\",\\n      \\\"size\\\": \\\"Small\\\",\\n      \\\"color\\\": \\\"Accent\\\"\\n    },\\n    {\\n      \\\"type\\\": \\\"ColumnSet\\\",\\n      \\\"columns\\\": [\\n        {\\n          \\\"type\\\": \\\"Column\\\",\\n          \\\"width\\\": \\\"stretch\\\",\\n          \\\"horizontalAlignment\\\": \\\"Center\\\",\\n          \\\"items\\\": [\\n            {\\n              \\\"type\\\": \\\"ActionSet\\\",\\n              \\\"actions\\\": [\\n                {\\n                  \\\"type\\\": \\\"Action.Submit\\\",\\n                  \\\"title\\\": \\\"Yes, this was me\\\",\\n                  \\\"data\\\": { \\\"action\\\": \\\"confirm\\\", \\\"userResponse\\\": \\\"yes\\\" },\\n                  \\\"style\\\": \\\"positive\\\",\\n                  \\\"iconUrl\\\": \\\"icon:Checkmark\\\"\\n                },\\n                {\\n                  \\\"type\\\": \\\"Action.Submit\\\",\\n                  \\\"title\\\": \\\"No, this wasn't me\\\",\\n                  \\\"data\\\": { \\\"action\\\": \\\"report\\\", \\\"userResponse\\\": \\\"no\\\" },\\n                  \\\"style\\\": \\\"destructive\\\",\\n                  \\\"iconUrl\\\": \\\"icon:ShieldError\\\"\\n                }\\n              ]\\n            }\\n          ]\\n        }\\n      ]\\n    }\\n  ]\\n}\"\n    }\n  ]\n}",
+          "proxy_host": null,
+          "proxy_password": null,
+          "proxy_port": null,
+          "proxy_user": null,
+          "public_action_id": "[sanitized]",
+          "redirect_follow": true,
+          "retry_on_status_code": null,
+          "retry_on_status_codes": [
+            500
+          ],
+          "ssl_verification": true,
+          "timeout": 30,
+          "url": "{{Connection.protocol}}{{Connection.url}}<@/v1.0/chats/@>{{create-chat-with-affected-user.body.id}}/messages",
+          "url_path": null,
+          "url_prefix": null,
+          "use_authentication_data": true,
+          "use_proxy": false
+        },
+        "description": "Send a new chatMessage in the specified chat",
+        "integration_id": "[sanitized]",
+        "snippet_version_id": null,
+        "snippet_workflow_id": null,
+        "tag": "integration",
+        "type": "http_request",
+        "use_connection_name": false
+      },
+      "connected_to": [],
+      "export_id": 4,
+      "parent_action": null
+    }
+  ],
+  "description": "",
+  "name": "Azure - Impossible Travel - Check and Verify With User"
+}
